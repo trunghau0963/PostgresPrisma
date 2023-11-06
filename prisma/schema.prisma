@@ -1,0 +1,54 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Post {
+  id           String   @id @default(uuid()) // nen dung uuid thay vi autoincrease vi bao mat hon/ hoan toan doc nhat
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  title        String   @db.VarChar(255)
+  content      String?
+  published    Boolean  @default(false)
+  author       User     @relation("posts", fields: [authorId], references: [id])
+  authorId     String
+  favoriteBy   User?    @relation("favoritesPost", fields: [favoriteById], references: [id])
+  favoriteById String? //disambiguaing multiple one to many relationship
+  // @@id(p)
+}
+
+model Profile {
+  id     String  @id @default(uuid())
+  bio    String?
+  user   User    @relation(fields: [userId], references: [id])
+  userId String  @unique
+}
+
+model User {
+  id            String   @id @default(uuid())
+  email         String   @unique
+  name          String?
+  age           Int
+  role          Role     @default(BASIC) //
+  posts         Post[]   @relation("posts")
+  favoritesPost Post[]   @relation("favoritesPost")
+  profile       Profile?
+  // preferences   Json
+  // userPreference UserPrfe
+
+  @@unique([age, name]) // we cannot have 2 people have a same age and same name
+  @@index([email]) // if we wanna like query by email, it would be good to have an index on that field
+}
+
+enum Role {
+  BASIC
+  EDITOR
+  ADMIN
+}
