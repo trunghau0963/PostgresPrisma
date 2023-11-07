@@ -5,7 +5,7 @@ const prisma = new PrismaClient();
 async function main() {
   await prisma.user.deleteMany()
 }
-
+//dadada
 main()
   .then(async () => {
     await prisma.$disconnect();
